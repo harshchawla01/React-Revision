@@ -1,21 +1,10 @@
-import { FormEvent, useRef } from "react";
+import { FormEvent, useRef, useState } from "react";
 
 function Form() {
-  const nameRef = useRef<HTMLInputElement>(null); // null sets the 'current' property
-  const ageRef = useRef<HTMLInputElement>(null);
-  const person = { name: "", age: 0 };
+  const [person, setPerson] = useState({ name: "", age: "" });
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (nameRef.current) {
-      // current represents a DOM node
-      person.name = nameRef.current.value; // For using this, we require useRef<HTMLInputElement>
-      //   console.log(nameRef.current.value);
-    }
-    if (ageRef.current) {
-      person.age = parseInt(ageRef.current.value); // Since age is defined as type=number in the form input
-      //   console.log(ageRef.current.value);
-    }
     console.log(person);
   };
 
@@ -26,14 +15,31 @@ function Form() {
         <label htmlFor="name" className="form-label">
           Name
         </label>
-        <input ref={nameRef} id="name" type="text" className="form-control" />
+        <input
+          value={person.name} // value property maintains the state of the input field and is set to the name property of the person object here so that the react is always in sync with the input field
+          // This input field is a controlled component because the value of the input field is controlled by the state of the component and not by the DOM
+          onChange={(event) =>
+            setPerson({ ...person, name: event.target.value })
+          }
+          id="name"
+          type="text"
+          className="form-control"
+        />
       </div>
 
       <div className="mb-3">
         <label htmlFor="age" className="form-label">
           Age
         </label>
-        <input ref={ageRef} id="age" type="number" className="form-control" />
+        <input
+          onChange={(event) =>
+            setPerson({ ...person, age: event.target.value })
+          }
+          value={person.age}
+          id="age"
+          type="number"
+          className="form-control"
+        />
       </div>
       <button className="btn btn-primary" type="submit">
         Submit
