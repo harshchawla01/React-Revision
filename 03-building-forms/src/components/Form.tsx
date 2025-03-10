@@ -20,7 +20,7 @@ function Form() {
     register,
     handleSubmit,
     formState: { errors, isValid }, // nested destructuring
-  } = useForm<FormData>({ resolver: zodResolver(schema), mode: "onChange" });
+  } = useForm<FormData>({ resolver: zodResolver(schema), mode: "onChange" }); // mode here states that validation should happen on change of input field and not only on submit
 
   // When using react-hook-form (useForm), you don't need to call event.preventDefault() manually. React Hook Form automatically prevents the default form submission behavior when using its handleSubmit function.
   const onSubmit = (data: FieldValues) => console.log("Data ", data);
