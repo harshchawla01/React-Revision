@@ -1,30 +1,45 @@
 import { FormEvent, useRef, useState } from "react";
+import { FieldValues, useForm } from "react-hook-form";
+
+// It is not necessary to define but by default compiler is not aware of out input fields if you want your from data to be shown in intelliSense, you can define an interface
+interface FormData {
+  name: string;
+  age: number;
+}
 
 function Form() {
-  const [person, setPerson] = useState({ name: "", age: "" });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>(); // nested destructuring
+  console.log(register("name")); // uses reference object so no rerendering is involved here
+  console.log(errors);
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    console.log(person);
-  };
+  const onSubmit = (data: FieldValues) => console.log("Data ", data);
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       {/* div.mb-3>label.form-label+input.form-control */}
       <div className="mb-3">
         <label htmlFor="name" className="form-label">
           Name
         </label>
         <input
-          value={person.name} // value property maintains the state of the input field and is set to the name property of the person object here so that the react is always in sync with the input field
-          // This input field is a controlled component because the value of the input field is controlled by the state of the component and not by the DOM
-          onChange={(event) =>
-            setPerson({ ...person, name: event.target.value })
-          }
+          {...register("name", { required: true, minLength: 3 })}
           id="name"
           type="text"
           className="form-control"
         />
+        {errors.name?.type === "required" && (
+          <p className="text-danger">The name field is required.</p>
+        )}
+        {/* Optional chaining: '?' here signifies that it will check this condition only if errors has the property name */}
+        {errors.name?.type === "minLength" && (
+          <p className="text-danger">
+            The name must have a minimum length of 3
+          </p>
+        )}
       </div>
 
       <div className="mb-3">
@@ -32,10 +47,7 @@ function Form() {
           Age
         </label>
         <input
-          onChange={(event) =>
-            setPerson({ ...person, age: event.target.value })
-          }
-          value={person.age}
+          {...register("age")}
           id="age"
           type="number"
           className="form-control"
