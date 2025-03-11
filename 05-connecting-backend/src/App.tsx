@@ -1,35 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import ProductList from "./components/ProductList";
+
+const connect = () => console.log("Connecting");
+const disconnect = () => console.log("Disconnecting");
 
 const App = () => {
-  const ref = useRef<HTMLInputElement>(null);
-
-  const [category, setCategory] = useState("");
-
-  // called after render
-  // useEffect(() => {
-  //   // Side effect - Changed something outside of this component (in the DOM)
-  //   if (ref.current) ref.current.focus();
-  // });
-
   useEffect(() => {
-    document.title = "My App";
+    connect(); // connecting / subscribing / showing modal
+
+    // Did whatever we want
+
+    return () => disconnect(); // disconnecting / unsubscribing / hiding modal
+    // We know react renders our component twice in strict mode. Before rendering the second time. It will first unmount your component from the screen (basically the disconnect thing that we are doing here)
   });
 
-  return (
-    <div>
-      <select
-        onChange={(event) => setCategory(event.target.value)}
-        className="form-select"
-      >
-        <option value=""></option>
-        <option value="Clothing">Clothing</option>
-        <option value="Household">Household</option>
-      </select>
-      {/* <input ref={ref} type="text" className="form-control" /> */}
-      <ProductList category={category} />
-    </div>
-  );
+  return <div></div>;
 };
 
 export default App;
