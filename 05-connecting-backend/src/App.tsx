@@ -1,12 +1,7 @@
 // import axios, { CanceledError } from "axios";
 import { useEffect, useState } from "react";
 import apiClient, { CanceledError } from "./services/api-client";
-
-interface User {
-  // say we are just interested in first two properties only
-  id: number;
-  name: string;
-}
+import userService, { User } from "./services/user-service";
 
 // interface Error {
 //   message: string;
@@ -17,15 +12,13 @@ function App() {
   const [users, setUsers] = useState<User[]>([]); // We have to specify the type of state variable as an array of User objects because while fetching data, we are expecting an array of users
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
-    const controller = new AbortController(); // to cancel or abort async operations
     setIsLoading(true);
-    apiClient
-      // tell get that we are expecting an array of users
-      .get<User[]>("/users", {
-        signal: controller.signal,
-      })
-      // .get("https://jsonplaceholder.typicode.com/users")
+
+    const { request, cancel } = userService.getAll<User>(); // Here we have to mention <User> for generic HttpRequest
+    // .get("https://jsonplaceholder.typicode.com/users")
+    request
       .then((res) => {
         setUsers(res.data);
         setIsLoading(false);
@@ -39,7 +32,7 @@ function App() {
     //   setIsLoading(false); // Doesn't work with the strict mode turned on
     // });
 
-    return () => controller.abort();
+    return () => cancel();
   }, []);
 
   // Using: Approach 1 - Optimistic update - Update the UI first and then make the API call
@@ -47,7 +40,7 @@ function App() {
   const deleteUser = (user: User) => {
     const originalUsers = [...users];
     setUsers(users.filter((u) => u.id !== user.id));
-    apiClient.delete("/users/" + user.id).catch((err) => {
+    userService.delete(user.id).catch((err) => {
       if (err instanceof CanceledError) return;
       setError(err.message);
       setUsers(originalUsers);
@@ -59,8 +52,8 @@ function App() {
     const newUser = { id: 0, name: "Harsh" }; // Can make a form also
     setUsers([newUser, ...users]);
 
-    apiClient
-      .post("/users", newUser)
+    userService
+      .create(newUser)
       // .then((res) => setUsers([res.data, ...users]));
       .then(({ data: savedUser }) => setUsers([savedUser, ...users]))
       .catch((err) => {
@@ -74,7 +67,7 @@ function App() {
     const updatedUser = { ...user, name: user.name + "!" };
     setUsers(users.map((u) => (u.id === user.id ? updatedUser : u)));
 
-    apiClient.patch("/users/" + user.id, updatedUser).catch((err) => {
+    userService.update(updatedUser).catch((err) => {
       setError(err.message);
       setUsers(originalUsers);
     });
